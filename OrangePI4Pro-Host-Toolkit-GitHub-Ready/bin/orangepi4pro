@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+ROOT="/opt/orangepi4pro"
+source "$ROOT/lib/common.sh"
+source "$ROOT/lib/status.sh"
+source "$ROOT/lib/doctor.sh"
+
+usage(){ cat <<USAGE
+OrangePI4Pro Host Toolkit v$(cat "$ROOT/VERSION")
+
+Commands:
+  status
+  doctor
+  verify
+  health
+  kernel-build
+  kernel-rollback
+  can-install
+  can-reset
+  backup
+  report
+  version
+USAGE
+}
+
+cmd="${1:-}"
+case "$cmd" in
+  status) status_main ;;
+  doctor) doctor_main ;;
+  verify) "$ROOT/diagnostics/verify-host.sh" ;;
+  health) status_main; echo; doctor_main ;;
+  kernel-build) exec "$ROOT/kernel/build-can-kernel.sh" ;;
+  kernel-rollback) exec "$ROOT/kernel/rollback-kernel.sh" ;;
+  can-install) exec "$ROOT/can/install-delayed-can.sh" ;;
+  can-reset) require_root; ip link set can0 down 2>/dev/null || true; modprobe -r gs_usb 2>/dev/null || true; sleep 2; modprobe gs_usb; systemctl restart can0-delayed.service ;;
+  backup) require_root; dest="/opt/orangepi4pro-backups/toolkit-$(date +%Y%m%d-%H%M%S)"; mkdir -p "$(dirname "$dest")"; cp -a "$ROOT" "$dest"; echo "$dest" ;;
+  report) exec "$ROOT/diagnostics/report.sh" ;;
+  version) cat "$ROOT/VERSION" ;;
+  "") usage ;;
+  *) echo "Unknown command: $cmd"; usage; exit 2 ;;
+esac

@@ -1,0 +1,12 @@
+*.log
+*.tmp
+*.swp
+*.bak
+*~
+.DS_Store
+__pycache__/
+*.pyc
+releases/*.tar.gz
+releases/*.zip
+support-report-*.txt
+backup-*.tar.gz

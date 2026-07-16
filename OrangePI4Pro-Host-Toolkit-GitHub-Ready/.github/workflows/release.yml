@@ -1,0 +1,27 @@
+name: Build release archives
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install packaging tools
+        run: sudo apt-get update && sudo apt-get install -y rsync zip
+      - name: Build archives
+        run: make package
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            releases/OrangePI4Pro-v*.tar.gz
+            releases/OrangePI4Pro-v*.zip
+            releases/SHA256SUMS
+          body_path: releases/v3.1.0.md
